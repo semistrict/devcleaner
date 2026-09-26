@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const Version = "0.2.0"
+const Version = "0.2.1"
 
 type Identity struct {
 	Device uint64 `json:"device"`

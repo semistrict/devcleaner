@@ -6,9 +6,11 @@ It inventories **Git worktrees and the generated artifacts inside each worktree 
 
 ## Download
 
-Download the signed CLI and menu-bar app from [GitHub Releases](https://github.com/semistrict/devcleaner/releases/latest). Choose an archive matching your Mac: `arm64` is Apple Silicon and `amd64` is Intel. Only architectures present in the release assets are available. The CLI archive contains the full standalone executable; the app is optional.
+DevCleaner supports **Apple Silicon Macs running macOS 12 or later**. Downloads are on [GitHub Releases](https://github.com/semistrict/devcleaner/releases/latest).
 
-Download `SHA256SUMS` and the archives into the same folder, then run `shasum -a 256 -c SHA256SUMS` after downloading all listed files. See `SIGNING.txt` for that release's signing and notarization status. Signed builds that have not been notarized may be blocked by macOS Gatekeeper on first launch.
+For releases with a `.dmg`, open it and drag **DevCleaner.app** into **Applications**, then open the app. The full CLI is also included at `/Applications/DevCleaner.app/Contents/MacOS/devcleaner`, and as a separate `devcleaner_VERSION_darwin_arm64.tar.gz` archive. Agents can invoke the bundled executable directly. The app keeps scanning permissions separate from your terminal; macOS may still ask you to grant Full Disk Access.
+
+`SIGNING.txt` records the release's Apple verification status. The initial v0.2.0 release was signed but not notarized; later releases require notarization and Gatekeeper verification before upload. `SHA256SUMS` covers the downloadable archives and metadata.
 
 ## Build
 
@@ -230,20 +232,22 @@ For example, `refresh --path "$HOME/.lima/default" --path "$HOME/Library/Caches/
 
 ## Local signed releases
 
-All compilation, signing, and optional notarization run on your Mac. GitHub hosts the source and finished downloads; no hosted build workflow is required.
+All builds, signing, and Apple verification run locally on an Apple Silicon Mac. GitHub only hosts source and finished downloads.
 
 ```sh
-# Commit the release sources first.
+# One-time Apple Developer login, stored in the local keychain:
+make setup-notarization
+# Commit release sources, then build, sign, and notarize:
 make release
-# Push that commit, then upload the local archives:
+# Push that source commit, then upload:
 make release-upload
 ```
 
-`make release` requires a clean committed checkout and records `SOURCE_COMMIT` with the archives. It uses the sole available Developer ID Application identity, or `DEVCLEANER_SIGN_IDENTITY` when set. It builds the host architecture only, signs the CLI and app with hardened runtime and a secure timestamp, verifies signatures, and writes archives plus SHA-256 checksums under `dist/vVERSION/darwin-ARCH`. It does not alter the running development app. The CLI and bundle versions must match.
+`make release` requires a clean committed checkout, uses your Developer ID Application certificate, and builds arm64 only. It embeds the full CLI in the app, creates a drag-to-Applications disk image, submits it to Apple, staples verification tickets, and checks Gatekeeper acceptance. Archives, checksums, and `SOURCE_COMMIT` are saved under `dist/vVERSION/darwin-arm64`. The running development app is not replaced.
 
-To notarize, set `DEVCLEANER_NOTARY_PROFILE` to an existing `notarytool` keychain profile before `make release`. The script submits both binaries to Apple and staples the app ticket. Without that profile, it explicitly marks the assets as signed but not notarized. Credentials are never stored in this repository or uploaded to GitHub.
+Set `DEVCLEANER_SIGN_IDENTITY` when multiple Developer ID identities exist. `DEVCLEANER_NOTARY_PROFILE` selects an existing keychain login; it defaults to `devcleaner`. If verification is interrupted after building, `make release-notarize` resumes from the local assets. Login credentials and signing keys remain outside this repository.
 
-`make release-upload` verifies checksums and a clean checkout matching GitHub's `main`, then creates a release with the local assets. Existing releases are never overwritten. Override `DEVCLEANER_GITHUB_REPO` for a fork.
+`make release-upload` requires an accepted Apple verification receipt, matching checksums, and a clean source commit matching GitHub's `main`. It never overwrites an existing release. `DEVCLEANER_GITHUB_REPO` can point to a fork.
 
 ## License
 
