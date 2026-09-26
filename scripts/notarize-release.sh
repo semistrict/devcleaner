@@ -26,6 +26,12 @@ xcrun stapler staple "$work/DevCleaner.app"
 xcrun stapler validate "$work/DevCleaner.app"
 codesign --verify --deep --strict "$work/DevCleaner.app"
 spctl --assess --type execute --verbose=2 "$work/DevCleaner.app"
+# Verify the shipped standalone CLI has the same notarized code as the helper.
+mkdir "$work/cli"
+tar -xzf "$out/$cli" -C "$work/cli"
+cmp "$work/cli/devcleaner" "$work/DevCleaner.app/Contents/Helpers/devcleaner"
+spctl --assess --type execute --verbose=2 "$work/cli/devcleaner"
+"$work/cli/devcleaner" --standalone version
 spctl --assess --type open --context context:primary-signature --verbose=2 "$out/$dmg"
 ditto -c -k --sequesterRsrc --keepParent "$work/DevCleaner.app" "$out/$app"
 printf 'Developer ID signed and notarized by Apple. Apple Silicon; macOS 12 or later.\n' > "$out/SIGNING.txt"

@@ -8,7 +8,7 @@ It inventories **Git worktrees and the generated artifacts inside each worktree 
 
 DevCleaner supports **Apple Silicon Macs running macOS 12 or later**. Downloads are on [GitHub Releases](https://github.com/semistrict/devcleaner/releases/latest).
 
-For releases with a `.dmg`, open it and drag **DevCleaner.app** into **Applications**, then open the app. The full CLI is also included at `/Applications/DevCleaner.app/Contents/MacOS/devcleaner`, and as a separate `devcleaner_VERSION_darwin_arm64.tar.gz` archive. Agents can invoke the bundled executable directly. The app keeps scanning permissions separate from your terminal; macOS may still ask you to grant Full Disk Access.
+For releases with a `.dmg`, open it and drag **DevCleaner.app** into **Applications**, then open the app. The full CLI is also included at `/Applications/DevCleaner.app/Contents/Helpers/devcleaner`, and as a separate `devcleaner_VERSION_darwin_arm64.tar.gz` archive. Agents can invoke the bundled executable directly. The app keeps scanning permissions separate from your terminal; macOS may still ask you to grant Full Disk Access.
 
 `SIGNING.txt` records the release's Apple verification status. The initial v0.2.0 release was signed but not notarized; later releases require notarization and Gatekeeper verification before upload. `SHA256SUMS` covers the downloadable archives and metadata.
 

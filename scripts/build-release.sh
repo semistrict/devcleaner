@@ -35,7 +35,12 @@ go build -trimpath -ldflags '-extldflags=-mmacosx-version-min=12.0' -o "$work/de
 [ "$("$work/devcleaner" --standalone version)" = "DevCleaner $version" ] || { echo 'CLI and bundle versions differ.' >&2; exit 1; }
 codesign --force --options runtime --timestamp --sign "$identity" "$work/devcleaner"
 ./scripts/build-app.sh
-cp "$work/devcleaner" "$work/DevCleaner.app/Contents/MacOS/devcleaner"
+# Default macOS volumes ignore case: DevCleaner and devcleaner collide.
+mkdir -p "$work/DevCleaner.app/Contents/Helpers"
+cp "$work/devcleaner" "$work/DevCleaner.app/Contents/Helpers/devcleaner"
+if cmp -s "$work/devcleaner" "$work/DevCleaner.app/Contents/MacOS/DevCleaner"; then
+    echo 'The app executable was replaced by the CLI.' >&2; exit 1
+fi
 codesign --force --options runtime --timestamp --sign "$identity" "$work/DevCleaner.app"
 codesign --verify --strict --verbose=2 "$work/devcleaner"
 codesign --verify --deep --strict --verbose=2 "$work/DevCleaner.app"
