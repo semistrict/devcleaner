@@ -1,0 +1,12 @@
+/bin/
+/coverage.out
+.DS_Store
+*.db
+*.db-*
+
+/dist/
+.env
+.env.*
+*.p12
+*.pfx
+*.key
