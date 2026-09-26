@@ -30,7 +30,9 @@ spctl --assess --type execute --verbose=2 "$work/DevCleaner.app"
 mkdir "$work/cli"
 tar -xzf "$out/$cli" -C "$work/cli"
 cmp "$work/cli/devcleaner" "$work/DevCleaner.app/Contents/Helpers/devcleaner"
-spctl --assess --type execute --verbose=2 "$work/cli/devcleaner"
+# spctl's execute assessment expects an app bundle. Apple's standalone-code
+# check requires the notarization ticket explicitly instead.
+codesign --verify --strict --verbose=2 --check-notarization -R=notarized "$work/cli/devcleaner"
 "$work/cli/devcleaner" --standalone version
 spctl --assess --type open --context context:primary-signature --verbose=2 "$out/$dmg"
 ditto -c -k --sequesterRsrc --keepParent "$work/DevCleaner.app" "$out/$app"
